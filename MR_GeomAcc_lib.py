@@ -136,9 +136,6 @@ def GeomAcc_rgb(data, results, action):
     
     breakpoint()
     for file in sortedfiles:
-        # the 7 different slices are from 7 z-locations
-        # they are not equidistant
-        # should use ImagePositionPatient to figure out geometric center
         image_data = file.pixel_array
         image_data_gray = rgb2gray(image_data)
         
@@ -153,6 +150,8 @@ def GeomAcc_rgb(data, results, action):
         lineTeal = image_data_gray == 0.7875000000000001
         lineGreen = image_data_gray == 0.1683294117647059
         
+        # TO DO: lines to mask
+        
         # find pixel of the geometric center
         x0 = np.round( (0 - file.ImagePositionPatient[0] + (file.PixelSpacing[0] / 2)) / file.PixelSpacing[0])
         y0 = np.round( (0 - file.ImagePositionPatient[1] + (file.PixelSpacing[1] / 2)) / file.PixelSpacing[1])
@@ -160,6 +159,11 @@ def GeomAcc_rgb(data, results, action):
         # find pixel where the table starts
         tablePix = np.round((float(params['table_cutoff']) - file.ImagePositionPatient[1] + (file.PixelSpacing[1] / 2)) / file.PixelSpacing[1])
         
+        # the 7 different slices are from 7 z-locations
+        # they are not equidistant
+        # the radius of the spheres at the intersections with the phantom slices are given by:
+        # radius(z) = sqrt(R^2 - z^2), with R the radius of the current sphere
+        # Note, the smaller spheres will not intersect with all slices
         curZ = file.ImagePositionPatient[2]
         
         for n in range(len(radiusDSV)):
@@ -170,13 +174,20 @@ def GeomAcc_rgb(data, results, action):
                 fig,axs = plt.subplots()
                 axs.imshow(image_data_gray,cmap='gray')
                 
+                # the larger spheres can extent into the table, where there is no phantom
+                # avoid this region for plotting/analysis
+                # this means cutting of a part of the circle (or drawing just a part of it)
                 if (tablePix - y0) < rdsv:
                     arcstart = 90 + np.arccos((tablePix-y0)/rdsv) * 180/np.pi
                     arcend = 90 - np.arccos((tablePix-y0)/rdsv) * 180/np.pi
                     axs.add_patch(Arc([x0,y0],2*rdsv,2*rdsv,angle=0,theta1=arcstart,theta2=arcend,lw=2,ec=colorDSV[n]))
                     
-                    # connect the start and end of the Arc with a line     
+                    # TO DO: connect the start and end of the Arc with a line     
                 else:
                     axs.add_patch(Circle([x0,y0],rdsv,fc='none',lw=2,ec=colorDSV[n])) 
                 
                 axs.axis('off')
+                
+                # TO DO: sphere to mask
+                
+                # TO DO: Check if spheres are within isolines (use masks?)
