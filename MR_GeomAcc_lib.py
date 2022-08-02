@@ -6,6 +6,7 @@ Created on Mon Aug  1 10:15:31 2022
 @author: tschakel
 """
 from wad_qc.modulelibs import wadwrapper_lib
+from MR_GeomAcc_util import *
 import numpy as np
 from skimage.color import rgb2gray
 import pydicom
@@ -129,13 +130,12 @@ def GeomAcc_rgb(data, results, action):
     sortedfiles = sorted(files, key=lambda f: f.ImagePositionPatient[2])
 
     # set some constants:
-    radiusDSV = [100,170,225] #radii of the spheres
+    radiusDSV = [100,170,225] #radii of the spheres in mm
     colorDSV = ['red','teal','green']
     
-    breakpoint()
     for file in sortedfiles:
         image_data = file.pixel_array
-        image_data_gray = rgb2gray(image_data)
+        #image_data_gray = rgb2gray(image_data)
         
         # red = 5 mm
         # yellow = 3 mm
@@ -143,12 +143,17 @@ def GeomAcc_rgb(data, results, action):
         # green = 1 mm
         # the cutoff values for the different colors are determined from the boxes in the bottom legend
         # could be done automatically, position of boxes is always the same (but pixelvalues too?)
-        lineRed = image_data_gray == 0.2125
-        lineYellow = image_data_gray == 0.9279000000000001
-        lineTeal = image_data_gray == 0.7875000000000001
-        lineGreen = image_data_gray == 0.1683294117647059
         
-        # TO DO: lines to mask
+        # find the isolines
+        b_green, b_teal, b_yellow, b_red = get_rgb_lines_slice(image_data)
+        # create the masks
+        fill_boundaries(image_data, b_green, b_teal, b_yellow, b_red)
+        
+        # in b_green/teal/yellow/red are the points for all the boundaries and the corresponding masks
+        # we can used these masks to create and overall mask maybe with something like a volume 
+        # largest volume > 1's check if smaller volume is inside larger volume -> and so on
+        breakpoint()    
+        
         
         # find pixel of the geometric center
         x0 = np.round( (0 - file.ImagePositionPatient[0] + (file.PixelSpacing[0] / 2)) / file.PixelSpacing[0])
