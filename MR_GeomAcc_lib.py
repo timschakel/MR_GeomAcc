@@ -12,8 +12,6 @@ import pydicom
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse,Circle,Arc
 
-from MR_GeomAcc_util import arc_patch
-
 ### Helper functions
 def getValue(ds, label):
     """Return the value of a pydicom DataElement in Dataset identified by label.
@@ -124,7 +122,7 @@ def GeomAcc_rgb(data, results, action):
     # data1.PhotometricInterpretation (should be 'RGB')
     
     files = []
-    for fname in data.series_filelist[0]:
+    for fname in data_series[0]:
         files.append(pydicom.dcmread(fname))
     
     # sort on ImagePositionPatient[2] (z-position)
