@@ -144,15 +144,15 @@ def GeomAcc_rgb(data, results, action):
         # the cutoff values for the different colors are determined from the boxes in the bottom legend
         # could be done automatically, position of boxes is always the same (but pixelvalues too?)
         
-        # find the isolines
+        # find the isolines and fill them
         b_green, b_teal, b_yellow, b_red = get_rgb_lines_slice(image_data)
-        # create the masks
-        fill_boundaries(image_data, b_green, b_teal, b_yellow, b_red)
         
         # in b_green/teal/yellow/red are the points for all the boundaries and the corresponding masks
         # we can used these masks to create and overall mask maybe with something like a volume 
         # largest volume > 1's check if smaller volume is inside larger volume -> and so on
-        breakpoint()    
+        m_green, m_teal, m_yellow, m_red = create_masks(b_green, b_teal, b_yellow, b_red)
+        
+          
         
         
         # find pixel of the geometric center
