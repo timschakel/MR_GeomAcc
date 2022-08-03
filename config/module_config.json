@@ -11,7 +11,8 @@
     	    "series_description": "Geometric Distortion_Rgb"
     	},
     	"params": {
-    	 "table_cutoff": "90"
+    	 "table_cutoff": "85",
+    	 "phantom_top_cutoff": "212"
     	}
     }
   },

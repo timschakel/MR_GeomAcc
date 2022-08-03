@@ -39,10 +39,24 @@ class boundary:
         
         
 
+class Mask:
+    def __init__(self, mask):
+        self.mask = mask
+        self.num_voxels = self.set_num_voxels()
+        
+    def set_num_voxels(self):
+        return np.sum(self.mask)
+
+    def inside(self, mask):
+        tmp = np.multiply(self.mask, mask)
+        return np.sum(tmp) == np.sum(mask)
+            
+        
+    
 def create_mask(boundaries):
     
     if len(boundaries) == 1:
-        return boundaries[0].mask
+        return Mask(boundaries[0].mask)
     
     boundaries.sort()
     boundaries.reverse()
@@ -59,7 +73,7 @@ def create_mask(boundaries):
         else:
             mask += boundaries[i].mask
     
-    return mask
+    return Mask(mask)
 '''
 create the overall masks given de all the filled in boundaries
 '''
@@ -139,7 +153,7 @@ def get_rgb_lines_slice(image):
     red = [255,0,0]
     yellow = [255,255,0]
     teal = [0,255,255]
-    green = [0,60,0]
+    green = [0,255,0]
     
     # 5mm
     line_red = get_points_rgb_color(image, red)
@@ -156,14 +170,12 @@ def get_rgb_lines_slice(image):
     
     return boundaries_green, boundaries_teal, boundaries_yellow, boundaries_red
     
-# def fill_boundaries(image, boundaries_green, boundaries_teal, boundaries_yellow, boundaries_red):
-#     for b in boundaries_red:
-#         b.fill(image)
-#     for b in boundaries_yellow:
-#         b.fill(image)    
-#     for b in boundaries_teal:
-#         b.fill(image)    
-#     for b in boundaries_red:
-#         b.fill(image)    
-        
-#     return
+
+def set_bright_green(image):
+    green = [0,60,0]
+    bright_green = [0,255,0]
+    
+    for y in range(image.shape[1]):
+        for x in range(image.shape[0]):
+            if compare_rgb(image[x,y], green):
+                image[x,y] = bright_green
