@@ -234,11 +234,11 @@ def GeomAcc_rgb(data, results, action):
     fig.delaxes(axs[divmod(idx_axs, 4)])
     filename = 'Geom_acc.png'
     fig.savefig(filename,dpi=300)
-    breakpoint()        
+    
     # after looping over files add results          
-    results.addBool("20cm inside 1mm iso", spheres_inside[0])
-    results.addBool("34cm inside 2mm iso", spheres_inside[1])
-    results.addBool("45cm inside 5mm iso", spheres_inside[2])
+    results.addBool("20cm inside 1mm iso", bool(spheres_inside[0]))
+    results.addBool("34cm inside 2mm iso", bool(spheres_inside[1]))
+    results.addBool("45cm inside 5mm iso", bool(spheres_inside[2]))
     results.addFloat("Area 1mm iso over 7 slices (m^2)", total_area[0])
     results.addFloat("Area 2mm iso over 7 slices (m^2)", total_area[1])
     results.addFloat("Area 3mm iso over 7 slices (m^2)", total_area[2])

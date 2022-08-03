@@ -130,7 +130,7 @@ def get_boundaries_from_points(points, image):
 if a -> [r,g,b] == b -> [r,g,b] return 1
 '''
 def compare_rgb(a,b):
-    return np.prod(a == b)
+    return a[0] == b[0] and a[1] == b[1] and a[2] == b[2]
 
 '''
 go over the image and found all points with a specific rgb value
