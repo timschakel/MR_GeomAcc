@@ -235,6 +235,7 @@ def GeomAcc_rgb(data, results, action):
     filename = 'Geom_acc.png'
     fig.savefig(filename,dpi=300)
     
+    breakpoint()
     # after looping over files add results          
     results.addBool("20cm inside 1mm iso", bool(spheres_inside[0]))
     results.addBool("34cm inside 2mm iso", bool(spheres_inside[1]))

@@ -156,16 +156,31 @@ def get_rgb_lines_slice(image):
     green = [0,255,0]
     
     # 5mm
-    line_red = get_points_rgb_color(image, red)
+    #line_red = get_points_rgb_color(image, red)
+    indices_red = np.where(np.all(image == red, axis=-1))
+    indices_legend = np.where(indices_red[0] > image.shape[0]-100) #skip the legend at bottom
+    line_red = list(zip(np.delete(indices_red[0],indices_legend),np.delete(indices_red[1],indices_legend)))
     boundaries_red = get_boundaries_from_points(line_red, image)
+
     # 3mm
-    line_yellow = get_points_rgb_color(image, yellow)
+    #line_yellow = get_points_rgb_color(image, yellow)
+    indices_yellow = np.where(np.all(image == yellow, axis=-1))
+    indices_legend = np.where(indices_yellow[0] > image.shape[0]-100)
+    line_yellow = list(zip(np.delete(indices_yellow[0],indices_legend),np.delete(indices_yellow[1],indices_legend)))
     boundaries_yellow = get_boundaries_from_points(line_yellow, image)
+    
     # 2mm 
-    line_teal = get_points_rgb_color(image, teal)
+    #line_teal = get_points_rgb_color(image, teal)
+    indices_teal = np.where(np.all(image == teal, axis=-1))
+    indices_legend = np.where(indices_teal[0] > image.shape[0]-100)
+    line_teal = list(zip(np.delete(indices_teal[0],indices_legend),np.delete(indices_teal[1],indices_legend)))
     boundaries_teal = get_boundaries_from_points(line_teal, image)
+    
     # 1mm
-    line_green = get_points_rgb_color(image, green)
+    #line_green = get_points_rgb_color(image, green)
+    indices_green = np.where(np.all(image == green, axis=-1))
+    indices_legend = np.where(indices_green[0] > image.shape[0]-100)
+    line_green= list(zip(np.delete(indices_green[0],indices_legend),np.delete(indices_green[1],indices_legend)))
     boundaries_green = get_boundaries_from_points(line_green, image)
     
     return boundaries_green, boundaries_teal, boundaries_yellow, boundaries_red
