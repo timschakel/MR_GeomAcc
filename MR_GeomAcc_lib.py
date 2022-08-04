@@ -137,6 +137,8 @@ def GeomAcc_rgb(data, results, action):
     spheres_inside = [True, True, True]
     # over all 7 slices 1mm ... 5mm
     total_area = [0.0, 0.0, 0.0, 0.0]
+    min_rad_from_ori = [99999.0, 99999.0, 99999.0, 99999.0]
+    
     # output figure
     fig, axs = plt.subplots(2,4)
     idx_axs = 0
@@ -146,20 +148,22 @@ def GeomAcc_rgb(data, results, action):
         
         set_bright_green(image_data)
         
-        # red = 5 mm
-        # yellow = 3 mm
-        # teal = 2 mm
-        # green = 1 mm
-        # the cutoff values for the different colors are determined from the boxes in the bottom legend
+        # find pixel of the geometric center
+        x0 = np.round( (0 - file.ImagePositionPatient[0] + (file.PixelSpacing[0] / 2)) / file.PixelSpacing[0])
+        y0 = np.round( (0 - file.ImagePositionPatient[1] + (file.PixelSpacing[1] / 2)) / file.PixelSpacing[1])
+        
+        # find pixel where the table starts
+        tablePix = np.round((float(params['table_cutoff']) - file.ImagePositionPatient[1] + (file.PixelSpacing[1] / 2)) / file.PixelSpacing[1])
+        # cutoff for the top part of the phantom (should only matter for slice 3,4,5)
+        topPix = np.round((-float(params['phantom_top_cutoff']) - file.ImagePositionPatient[1] + (file.PixelSpacing[1] / 2)) / file.PixelSpacing[1])
         
         # find the isolines and fill them
-        b_green, b_teal, b_yellow, b_red = get_rgb_lines_slice(image_data)
+        b_green, b_teal, b_yellow, b_red = get_rgb_lines_slice(image_data,y0,x0)
         
         # in b_green/teal/yellow/red are the points for all the boundaries and the corresponding masks
         # we can used these masks to create and overall mask maybe with something like a volume 
         # largest volume > 1's check if smaller volume is inside larger volume -> and so on
         m_green, m_teal, m_yellow, m_red = create_masks(b_green, b_teal, b_yellow, b_red)
-        
         
         # add area of masks to total
         area_pixel = file.PixelSpacing[0]*1e-3*file.PixelSpacing[1]*1e-3
@@ -171,15 +175,6 @@ def GeomAcc_rgb(data, results, action):
         # the 1mm, 2mm, 5mm masks for which we check if certain spheres fit inside
         mask_to_check = [m_green, m_teal, m_red]
           
-        # find pixel of the geometric center
-        x0 = np.round( (0 - file.ImagePositionPatient[0] + (file.PixelSpacing[0] / 2)) / file.PixelSpacing[0])
-        y0 = np.round( (0 - file.ImagePositionPatient[1] + (file.PixelSpacing[1] / 2)) / file.PixelSpacing[1])
-        
-        # find pixel where the table starts
-        tablePix = np.round((float(params['table_cutoff']) - file.ImagePositionPatient[1] + (file.PixelSpacing[1] / 2)) / file.PixelSpacing[1])
-        # cutoff for the top part of the phantom (should only matter for slice 3,4,5)
-        topPix = np.round((-float(params['phantom_top_cutoff']) - file.ImagePositionPatient[1] + (file.PixelSpacing[1] / 2)) / file.PixelSpacing[1])
-        
         # the 7 different slices are from 7 z-locations
         # they are not equidistant
         # the radius of the spheres at the intersections with the phantom slices are given by:
@@ -187,6 +182,15 @@ def GeomAcc_rgb(data, results, action):
         # Note, the smaller spheres will not intersect with all slices
         curZ = file.ImagePositionPatient[2]
         
+        # minimum radius from origin to each of the isolines
+        min_rad_from_ori_slice = calc_min_rad_from_origin(b_green, b_teal, b_yellow, b_red,curZ,file.PixelSpacing[0])
+        #print(b_green[0].min_rad, b_teal[0].min_rad, b_yellow[0].min_rad, b_red[0].min_rad)
+        #print(min_rad_from_ori_slice)
+        #remember smallest radius
+        for n in range(len(min_rad_from_ori)):
+            if min_rad_from_ori_slice[n] < min_rad_from_ori[n]:
+                min_rad_from_ori[n] = min_rad_from_ori_slice[n]
+            
         #add to output plot
         axs[divmod(idx_axs,4)].imshow(image_data)
         axs[divmod(idx_axs,4)].set_title("slice = " + str(idx_axs+1))
