@@ -159,8 +159,15 @@ def GeomAcc_rgb(data, results, action):
         # cutoff for the top part of the phantom (should only matter for slice 3,4,5)
         topPix = np.round((-float(params['phantom_top_cutoff']) - file.ImagePositionPatient[1] + (file.PixelSpacing[1] / 2)) / file.PixelSpacing[1])
         
+        # the 7 different slices are from 7 z-locations
+        # they are not equidistant
+        # the radius of the spheres at the intersections with the phantom slices are given by:
+        # radius(z) = sqrt(R^2 - z^2), with R the radius of the current sphere
+        # Note, the smaller spheres will not intersect with all slices
+        curZ = file.ImagePositionPatient[2]
+        
         # find the isolines and fill them
-        b_green, b_teal, b_yellow, b_red = get_rgb_lines_slice(image_data,y0,x0)
+        b_green, b_teal, b_yellow, b_red = get_rgb_lines_slice(image_data,y0,x0,tablePix,topPix,curZ,file.PixelSpacing[0])
         
         # in b_green/teal/yellow/red are the points for all the boundaries and the corresponding masks
         # we can used these masks to create and overall mask maybe with something like a volume 
@@ -177,17 +184,9 @@ def GeomAcc_rgb(data, results, action):
         # the 1mm, 2mm, 5mm masks for which we check if certain spheres fit inside
         mask_to_check = [m_green, m_teal, m_red]
           
-        # the 7 different slices are from 7 z-locations
-        # they are not equidistant
-        # the radius of the spheres at the intersections with the phantom slices are given by:
-        # radius(z) = sqrt(R^2 - z^2), with R the radius of the current sphere
-        # Note, the smaller spheres will not intersect with all slices
-        curZ = file.ImagePositionPatient[2]
-        
         # minimum radius from origin to each of the isolines
-        min_rad_from_ori_slice = calc_min_rad_from_origin(b_green, b_teal, b_yellow, b_red,curZ,file.PixelSpacing[0])
-        #print(b_green[0].min_rad, b_teal[0].min_rad, b_yellow[0].min_rad, b_red[0].min_rad)
-        #print(min_rad_from_ori_slice)
+        min_rad_from_ori_slice = calc_min_rad_from_origin(b_green, b_teal, b_yellow, b_red)
+
         #remember smallest radius
         for n in range(len(min_rad_from_ori)):
             if min_rad_from_ori_slice[n] < min_rad_from_ori[n]:
@@ -254,6 +253,7 @@ def GeomAcc_rgb(data, results, action):
     filename = 'Geom_acc.png'
     fig.savefig(filename,dpi=300)
     
+    breakpoint()
     # after looping over files add results          
     results.addBool("20cm inside 1mm iso", bool(spheres_inside[0]))
     results.addBool("34cm inside 2mm iso", bool(spheres_inside[1]))
@@ -262,4 +262,8 @@ def GeomAcc_rgb(data, results, action):
     results.addFloat("Area 2mm iso over 7 slices (m^2)", total_area[1])
     results.addFloat("Area 3mm iso over 7 slices (m^2)", total_area[2])
     results.addFloat("Area 5mm iso over 7 slices (m^2)", total_area[3])
+    results.addFloat("Max DSV 1mm iso", 2*min_rad_from_ori[0])
+    results.addFloat("Max DSV 2mm iso", 2*min_rad_from_ori[1])
+    results.addFloat("Max DSV 3mm iso", 2*min_rad_from_ori[2])
+    results.addFloat("Max DSV 5mm iso", 2*min_rad_from_ori[3])
     results.addObject("Isolines for 7 slices", filename)
