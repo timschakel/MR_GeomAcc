@@ -13,6 +13,7 @@ from skimage.draw import disk
 import pydicom
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse,Circle,Arc
+from matplotlib.lines import Line2D
 
 ### Helper functions
 def getValue(ds, label):
@@ -141,7 +142,7 @@ def GeomAcc_rgb(data, results, action):
     min_rad_from_ori = [99999.0, 99999.0, 99999.0, 99999.0]
     
     # output figure
-    fig, axs = plt.subplots(2,4)
+    fig, axs = plt.subplots(2,4,figsize=(10,5))
     idx_axs = 0
     
     for file in sortedfiles:
@@ -194,7 +195,7 @@ def GeomAcc_rgb(data, results, action):
             
         #add to output plot
         axs[divmod(idx_axs,4)].imshow(image_data)
-        axs[divmod(idx_axs,4)].set_title("slice = " + str(idx_axs+1))
+        axs[divmod(idx_axs,4)].set_title("Z offset (mm) = " + str(curZ))
         axs[divmod(idx_axs,4)].axis('off')
         for n in range(len(radiusDSV)):
             if radiusDSV[n]**2 - curZ**2 > 0: #check if current slice intersects with sphere
@@ -232,8 +233,24 @@ def GeomAcc_rgb(data, results, action):
     
         idx_axs += 1 
         
-    # to remove the empty subplot
-    fig.delaxes(axs[divmod(idx_axs, 4)])
+    # add legend in the empty subplot
+    axs[divmod(idx_axs,4)].axis('off')
+    legend_line = [Line2D([0],[0],color=colorDSV[0],linestyle=(3,(6,2))),
+                   Line2D([0],[0],color=colorDSV[1],linestyle=(3,(6,2))),
+                   Line2D([0],[0],color=colorDSV[2],linestyle=(3,(6,2))),
+                   Line2D([0],[0],color=colorDSV[0],linestyle=(3,(6,2))),
+                   Line2D([0],[0],color=colorDSV[1],linestyle=(3,(6,2))),
+                   Line2D([0],[0],color=colorDSV[2],linestyle=(3,(6,2)))]
+    legend_labels = ['DSV 20 cm', 
+                     'DSV 34 cm', 
+                     'DSV 45 cm', 
+                     'Passed = '+str(bool(spheres_inside[0])),
+                     'Passed = '+str(bool(spheres_inside[1])),
+                     'Passed = '+str(bool(spheres_inside[2]))]
+    axs[divmod(idx_axs,4)].legend(legend_line, legend_labels, 
+                                  loc='upper left',fontsize=15)
+    
+    plt.tight_layout()
     filename = 'Geom_acc.png'
     fig.savefig(filename,dpi=300)
     
