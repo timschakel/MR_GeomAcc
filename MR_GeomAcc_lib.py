@@ -9,6 +9,7 @@ from wad_qc.modulelibs import wadwrapper_lib
 from MR_GeomAcc_util import *
 import numpy as np
 from skimage.color import rgb2gray
+from skimage.draw import disk
 import pydicom
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse,Circle,Arc
@@ -205,11 +206,8 @@ def GeomAcc_rgb(data, results, action):
                     # avoid this region for plotting/analysis
                     # this means cutting of a part of the circle (or drawing just a part of it)
                     mask_circle = np.zeros(image_data.shape[0:2])
-                    for y in range(int(topPix),int(tablePix)): #we start from cutoff of phantom and go until we find the table
-                        for x in range(mask_circle.shape[1]):
-                            if np.sqrt((x0-x)**2 + (y0-y)**2) < rdsv :
-                                mask_circle[y,x] = 1
-                    
+                    rr, cc = disk((y0-topPix, x0), rdsv, shape = (tablePix-topPix, mask_circle.shape[1])) # create a cropped circle
+                    mask_circle[rr + int(topPix), cc] = 1
                     spheres_inside[n] = mask_to_check[n].inside(mask_circle)
                     
                #plotting
@@ -233,13 +231,12 @@ def GeomAcc_rgb(data, results, action):
                    axs[divmod(idx_axs,4)].add_patch(Circle([x0,y0],rdsv,fc='none',linestyle=(3,(6,2)),ec=colorDSV[n])) 
     
         idx_axs += 1 
-
+        
     # to remove the empty subplot
     fig.delaxes(axs[divmod(idx_axs, 4)])
     filename = 'Geom_acc.png'
     fig.savefig(filename,dpi=300)
     
-    breakpoint()
     # after looping over files add results          
     results.addBool("20cm inside 1mm iso", bool(spheres_inside[0]))
     results.addBool("34cm inside 2mm iso", bool(spheres_inside[1]))
