@@ -112,6 +112,27 @@ def get_boundaries_from_points(points, image,x0,y0,tablePix,topPix,curZ,pixelSpa
         boundaries.append(boundary(list(zip(coords[key][0],coords[key][1])), image, x0, y0,tablePix,topPix,curZ,pixelSpacing))
         
     return boundaries
+
+def image_to_line(image,color):
+    # get line indices
+    indices = np.where(np.all(image == color, axis=-1))
+    legend_indices = indices_legend = np.where(indices[0] > image.shape[0]-100)
+    line = list(zip(np.delete(indices[0],legend_indices),np.delete(indices[1],legend_indices)))
+    
+    # from line indices to 2D line image
+    line_array = np.array(line)
+    (xcoords,ycoords) = line_array.T
+    line_image = np.zeros((image.shape[0],image.shape[1]),dtype=int)
+    line_image[xcoords,ycoords]=1   
+    
+    # perform closing on the mask
+    line_image_closed = skimage.morphology.binary_closing(line_image, skimage.morphology.disk(5))
+    
+    # from mask to line indices again
+    mask_indices = np.where(line_image_closed)
+    mask_indices_list = list(zip(mask_indices[0],mask_indices[1]))
+    
+    return mask_indices_list
 '''
 given an image find yellow red teal and green pixels
 returns the boundaries for each color
@@ -123,27 +144,19 @@ def get_rgb_lines_slice(image,x0,y0,tablePix,topPix,curZ,pixelSpacing):
     green = [0,255,0]
     
     # 5mm
-    indices_red = np.where(np.all(image == red, axis=-1))
-    indices_legend = np.where(indices_red[0] > image.shape[0]-100) #skip the legend at bottom
-    line_red = list(zip(np.delete(indices_red[0],indices_legend),np.delete(indices_red[1],indices_legend)))
+    line_red = image_to_line(image,red)
     boundaries_red = get_boundaries_from_points(line_red, image,x0,y0,tablePix,topPix,curZ,pixelSpacing)
     
     # 3mm
-    indices_yellow = np.where(np.all(image == yellow, axis=-1))
-    indices_legend = np.where(indices_yellow[0] > image.shape[0]-100)
-    line_yellow = list(zip(np.delete(indices_yellow[0],indices_legend),np.delete(indices_yellow[1],indices_legend)))
+    line_yellow = image_to_line(image,yellow)
     boundaries_yellow = get_boundaries_from_points(line_yellow, image,x0,y0,tablePix,topPix,curZ,pixelSpacing)
     
     # 2mm 
-    indices_teal = np.where(np.all(image == teal, axis=-1))
-    indices_legend = np.where(indices_teal[0] > image.shape[0]-100)
-    line_teal = list(zip(np.delete(indices_teal[0],indices_legend),np.delete(indices_teal[1],indices_legend)))
+    line_teal = image_to_line(image,teal)
     boundaries_teal = get_boundaries_from_points(line_teal, image,x0,y0,tablePix,topPix,curZ,pixelSpacing)
     
     # 1mm
-    indices_green = np.where(np.all(image == green, axis=-1))
-    indices_legend = np.where(indices_green[0] > image.shape[0]-100)
-    line_green= list(zip(np.delete(indices_green[0],indices_legend),np.delete(indices_green[1],indices_legend)))
+    line_green = image_to_line(image,green)
     boundaries_green = get_boundaries_from_points(line_green, image,x0,y0,tablePix,topPix,curZ,pixelSpacing)
     
     return boundaries_green, boundaries_teal, boundaries_yellow, boundaries_red

@@ -144,7 +144,7 @@ def GeomAcc_rgb(data, results, action):
     # output figure
     fig, axs = plt.subplots(2,4,figsize=(10,5))
     idx_axs = 0
-    
+
     for file in sortedfiles:
         image_data = file.pixel_array
         
@@ -253,7 +253,6 @@ def GeomAcc_rgb(data, results, action):
     filename = 'Geom_acc.png'
     fig.savefig(filename,dpi=300)
     
-    breakpoint()
     # after looping over files add results          
     results.addBool("20cm inside 1mm iso", bool(spheres_inside[0]))
     results.addBool("34cm inside 2mm iso", bool(spheres_inside[1]))
