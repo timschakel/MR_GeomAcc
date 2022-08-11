@@ -50,7 +50,7 @@ class boundary:
         #if proper vector/array is created first, we can skip for loop? (speed gain?)
         for point in self.points:
             if point[0] > self.topPix and point[0] < self.tablePix:
-                rad2d = np.sqrt((point[0] - x0)**2 + (point[1] - y0)**2) * self.pixelSpacing
+                rad2d = np.sqrt((point[0] - x0)**2 + (point[1] - y0)**2) * self.pixelSpacing #convert to mm
                 rad3d = np.sqrt(self.curZ**2 + rad2d**2)
                 if rad3d < min_rad:
                     min_rad = rad3d
@@ -101,7 +101,7 @@ def create_masks(b_green, b_teal, b_yellow, b_red):
 
 def get_boundaries_from_points(points, image,x0,y0,tablePix,topPix,curZ,pixelSpacing):
     tmp_image = np.zeros(image.shape[0:2], dtype=np.bool)
-    boundaries = list[boundary]()
+    boundaries = list()
     
     for p in points:
         tmp_image[p] = True

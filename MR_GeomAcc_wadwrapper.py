@@ -24,14 +24,14 @@
 # Changelog:
 #   20220629: Initial version
 #
-# runfile('/nfs/arch11/researchData/USER/tschakel/projects/wadqc/QAtests/MRI_GEOMFIDEL/MR_GeomAcc_wadwrapper.py', args='-r results.json -c config/module_config.json -d /nfs/arch11/researchData/USER/tschakel/projects/wadqc/QAtests/MRI_GEOMFIDEL/testdata/data1', wdir='/nfs/arch11/researchData/USER/tschakel/projects/wadqc/QAtests/MRI_GEOMFIDEL')
+# runfile('/nfs/arch11/researchData/USER/tschakel/projects/wadqc/QAtests/MRI_GEOMFIDEL/MR_GeomAcc_wadwrapper.py', args= '-r results.json -c config/mr_philips_geometric_fidelity_config.json -d /nfs/arch11/researchData/USER/tschakel/projects/wadqc/QAtests/MRI_GEOMFIDEL/testdata/data2', wdir='/nfs/arch11/researchData/USER/tschakel/projects/wadqc/QAtests/MRI_GEOMFIDEL')
 
 # this will fail unless wad_qc is already installed
 from wad_qc.module import pyWADinput
 import MR_GeomAcc_lib
 
-# import matplotlib
-# matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend.
+import matplotlib
+matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend.
 """
 Created on Fri Jul 29 13:34:27 2022
 
@@ -48,11 +48,8 @@ if __name__ == "__main__":
         print(item[0]["SeriesDescription"].value+" with "+str(len(item))+" instances")
     
     """
-    Perform the analysis of the B0 and B1 measurements.
+    Perform the analysis of the Geometric accuracy results.
     """
-    
-    # read runtime parameters for module
-    # TO DO: read data once and pass to all functions instead of repeating for every test
     for name,action in config['actions'].items():
         if name == 'acqdatetime':
             MR_GeomAcc_lib.acqdatetime(data, results, action)

@@ -8,11 +8,10 @@ Created on Mon Aug  1 10:15:31 2022
 from wad_qc.modulelibs import wadwrapper_lib
 from MR_GeomAcc_util import *
 import numpy as np
-from skimage.color import rgb2gray
 from skimage.draw import disk
 import pydicom
 import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse,Circle,Arc
+from matplotlib.patches import Circle,Arc
 from matplotlib.lines import Line2D
 
 ### Helper functions
@@ -107,10 +106,9 @@ def GeomAcc_rgb(data, results, action):
          - 5 mm passed (done)
      - Extra statistics: 
          - total area of 1/2/3/5 mm accuracy? (done)
-         - largest sphere possible within 1/2/5 mm isoline?
+         - largest sphere possible within 1/2/5 mm isoline (done)
      - Output images:
          - Plot with 7 the slices with the sphere outlines (done)
-         - Extra ?
     """
     params = action["params"]
     filters = action["filters"]
@@ -146,8 +144,8 @@ def GeomAcc_rgb(data, results, action):
     idx_axs = 0
 
     for file in sortedfiles:
+        print("Processing slice "+str(idx_axs+1))
         image_data = file.pixel_array
-        
         set_bright_green(image_data)
         
         # find pixel of the geometric center
@@ -187,7 +185,7 @@ def GeomAcc_rgb(data, results, action):
         # minimum radius from origin to each of the isolines
         min_rad_from_ori_slice = calc_min_rad_from_origin(b_green, b_teal, b_yellow, b_red)
 
-        #remember smallest radius
+        # remember smallest radius
         for n in range(len(min_rad_from_ori)):
             if min_rad_from_ori_slice[n] < min_rad_from_ori[n]:
                 min_rad_from_ori[n] = min_rad_from_ori_slice[n]
@@ -251,7 +249,7 @@ def GeomAcc_rgb(data, results, action):
     
     plt.tight_layout()
     filename = 'Geom_acc.png'
-    fig.savefig(filename,dpi=300)
+    fig.savefig(filename,dpi=150)
     
     # after looping over files add results          
     results.addBool("20cm inside 1mm iso", bool(spheres_inside[0]))
@@ -261,8 +259,8 @@ def GeomAcc_rgb(data, results, action):
     results.addFloat("Area 2mm iso over 7 slices (m^2)", total_area[1])
     results.addFloat("Area 3mm iso over 7 slices (m^2)", total_area[2])
     results.addFloat("Area 5mm iso over 7 slices (m^2)", total_area[3])
-    results.addFloat("Max DSV 1mm iso", 2*min_rad_from_ori[0])
-    results.addFloat("Max DSV 2mm iso", 2*min_rad_from_ori[1])
-    results.addFloat("Max DSV 3mm iso", 2*min_rad_from_ori[2])
-    results.addFloat("Max DSV 5mm iso", 2*min_rad_from_ori[3])
-    results.addObject("Isolines for 7 slices", filename)
+    results.addFloat("Max DSV 1mm iso", 2*min_rad_from_ori[0]/10) #convert to diameter in cm
+    results.addFloat("Max DSV 2mm iso", 2*min_rad_from_ori[1]/10) #convert to diameter in cm
+    results.addFloat("Max DSV 3mm iso", 2*min_rad_from_ori[2]/10) #convert to diameter in cm
+    results.addFloat("Max DSV 5mm iso", 2*min_rad_from_ori[3]/10) #convert to diameter in cm
+    results.addObject("Figure all slices", filename)
